@@ -1,23 +1,17 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
-```{r}
+install.packages("dplyr")
+install.packages("lubridate")
+install.packages("lattice")
 
 library(dplyr)
 library(lubridate)
 library(lattice)
-```
-
-## Loading and preprocessing the data
-```{r  echo=TRUE}
 
 setwd("C:/Users/Jimmy/Documents/GitHub/RepData_PeerAssessment1")
-unzip("./activity.zip", exdir = "../DataSets")
+unzip("./activity.zip", exdir = "./DataSets")
 
-df <- read.csv("./DataSets/activity.csv")
+fileName <- "./DataSets/activity.csv"
+
+df <- read.csv(fileName)
 
 df$date <- as.Date(df$date, format = "%Y-%m-%d")
 df$DayPart <- day(df$date)
@@ -42,18 +36,13 @@ sumPerDay <-
   select(date, steps) %>%
   group_by(date) %>%
   summarise_all(funs(sum(., na.rm=TRUE)))
-```
 
-## What is mean total number of steps taken per day?
-
-```{r  echo=TRUE}
 histogram(~steps|DayText, data=na.omit(df), main="Distribution of steps by day of week")
+
 mean(na.omit(sumPerDay$steps))
 median(na.omit(sumPerDay$steps))
-```
 
-## What is the average daily activity pattern?
-```{r  echo=TRUE}
+#What is the average daily activity pattern?
 
 meanPerInterval <-
   df %>%
@@ -66,10 +55,7 @@ plot(x=meanPerInterval$interval, y=meanPerInterval$steps, type = "l")
 #Interval with maximum average steps
 subset(meanPerInterval, meanPerInterval$steps==max(meanPerInterval$steps))
 
-```
 
-## Imputing missing values
-```{r  echo=TRUE}
 
 #Number of missing valuese
 sum(is.na(df$steps))
@@ -98,18 +84,15 @@ sumPerDay2 <-
   select(date, steps) %>%
   group_by(date) %>%
   summarise_all(funs(sum(., na.rm=TRUE)))
-  
+
 histogram(~steps|DayText, data=na.omit(df2), main="Distribution of steps by day of week")
 
-#Difference in mean and median for set without missing values set with imputed missing values
+
 mean(na.omit(sumPerDay$steps)) - mean(na.omit(sumPerDay2$steps))
 median(na.omit(sumPerDay$steps)) - median(na.omit(sumPerDay2$steps))
-  
-```
 
+#time series plot
 
-## Are there differences in activity patterns between weekdays and weekends?
-```{r  echo=TRUE}
 
 meanPerIntervalWeekPart <-
   df2 %>%
@@ -117,6 +100,7 @@ meanPerIntervalWeekPart <-
   group_by(interval, weekpart) %>%
   summarise_all(funs(mean(., na.rm=TRUE)))
 
+summary(meanPerIntervalWeekPart)
+
 xyplot(steps ~ interval|factor(weekpart), data=meanPerIntervalWeekPart, type="l")
-```
 
